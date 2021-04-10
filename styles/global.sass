@@ -1,0 +1,14 @@
+@tailwind base
+@tailwind components
+@tailwind utilities
+
+.rb-link
+    @apply text-green-600
+    &:hover
+        @apply text-green-800 underline
+.header-link
+    &:hover
+        .header-sub-link
+            @apply visible opacity-100
+.breadcrumb
+    background-image: url('/images/breadcrumb-bg.jpg')
