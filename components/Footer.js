@@ -9,7 +9,7 @@ export default function Footer() {
   return (
     <div className="bg-white p-4">
       <footer className="container mx-auto flex items-center justify-between">
-        <div className="mb-4">
+        <div>
           Copyright © 2016{" "}
           <Link href="/">
             <a className="rb-link">
