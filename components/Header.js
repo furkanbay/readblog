@@ -1,10 +1,8 @@
-import { useState } from "react";
 import Link from "next/link";
 import Logo from "./SVG/Logo";
 import Arrow from "./SVG/Arrow";
 
 export default function Header() {
-  // const [show, setShow] = useState(false);
   const menuItems = [
     {
       id: 1,
@@ -74,16 +72,20 @@ export default function Header() {
   return (
     <div className="bg-white">
       <div className="flex justify-center border-b border-gray-300 py-6">
-        <Logo />
+        <Link href="/">
+          <a>
+            <Logo />
+          </a>
+        </Link>
       </div>
-      <div className="container mx-auto flex items-center justify-center">
+      <div className="container mx-auto flex flex-wrap items-center justify-center">
         {menuItems.map((item) => (
           <Link href={item.url} key={item.id}>
             <a className="px-6 py-4 uppercase flex items-center relative header-link hover:bg-green-100">
               {item.title}
               {item.subItems && <Arrow className="ml-2" />}
               {item.subItems && (
-                <div className="absolute right-0 top-full bg-white shadow-md invisible opacity-0 transition duration-200 ease-in-out header-sub-link">
+                <div className="absolute z-10 right-0 top-full bg-white shadow-md invisible opacity-0 transition duration-200 ease-in-out header-sub-link">
                   {item.subItems.map((sub) => (
                     <Link href={sub.url} key={sub.id}>
                       <a className="px-4 py-2 block whitespace-nowrap hover:bg-gray-200">

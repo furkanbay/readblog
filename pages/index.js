@@ -1,140 +1,120 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import Link from "next/link";
+import moment from "moment";
 import Seo from "../components/Seo";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Breadcrumb from "../components/Breadcrumb";
-import Search from "../components/SVG/Search";
+import Sidebar from "../components/Sidebar";
 import User from "../components/SVG/User";
 import Calendar from "../components/SVG/Calendar";
-import moment from "moment";
+import useFetch from "../utils/useFetch";
 
 export default function Home() {
   const [posts, setPosts] = useState([]);
+  const [filteredPosts, setFilteredPosts] = useState([]);
   const [users, setUsers] = useState([]);
   const [photos, setPhotos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
   const [search, setSearch] = useState("");
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(12);
+
+  const pages = [];
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
+  const currentItems = filteredPosts.slice(indexOfFirstItem, indexOfLastItem);
+
+  for (let i = 1; i < Math.ceil(filteredPosts.length / itemsPerPage); i++) {
+    pages.push(i);
+  }
+
+  const { response: postsRes, error, loading } = useFetch({
+    method: "get",
+    extent: "/posts",
+  });
+  const { response: usersRes } = useFetch({
+    method: "get",
+    extent: "/users",
+  });
+  const { response: photosRes } = useFetch({
+    method: "get",
+    extent: "/photos",
+  });
+
   useEffect(() => {
-    setLoading(true);
-    setError(false);
-    axios
-      .get("https://jsonplaceholder.typicode.com/posts")
-      .then(function (response) {
-        console.log(response);
-        setLoading(false);
-        setPosts(response.data);
-      })
-      .catch(function (error) {
-        setLoading(false);
-        setError(true);
-        console.log(error);
-      });
-    axios
-      .get("https://jsonplaceholder.typicode.com/users")
-      .then(function (response) {
-        console.log(response.data);
-        setUsers(response.data);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
-    axios
-      .get("https://jsonplaceholder.typicode.com/photos")
-      .then(function (response) {
-        console.log(response.data);
-        setPhotos(response.data);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
-  }, []);
+    setPosts(postsRes);
+    setFilteredPosts(postsRes);
+  }, [postsRes]);
+  useEffect(() => {
+    setUsers(usersRes);
+  }, [usersRes]);
+  useEffect(() => {
+    setPhotos(photosRes);
+  }, [photosRes]);
+
+  useEffect(() => {
+    setFilteredPosts(posts.filter((post) => post.title.includes(search)));
+  }, [search]);
 
   let today = new Date();
-  today = moment(today).format("MMM Do YY");
+  today = moment(today).format("D MMM, YYYY");
 
-  const categories = [
-    {
-      id: 1,
-      title: "Advertising",
-      items: 39,
-    },
-    {
-      id: 2,
-      title: "Creative",
-      items: 48,
-    },
-    {
-      id: 3,
-      title: "Inspiration",
-      items: 26,
-    },
-    {
-      id: 4,
-      title: "LifeStyle",
-      items: 24,
-    },
-    {
-      id: 5,
-      title: "Music",
-      items: 32,
-    },
-    {
-      id: 6,
-      title: "Photography",
-      items: 69,
-    },
-    {
-      id: 7,
-      title: "Fashion",
-      items: 78,
-    },
-    {
-      id: 8,
-      title: "Travel",
-      items: 49,
-    },
-  ];
+  const handleChange = (e) => {
+    setSearch(e.target.value);
+  };
 
   return (
     <div>
-      <Seo title="Astronaut Pickle" description="Astronaut pickle art space" />
+      <Seo title="Read Blog" description="We love creativity minimal blog." />
       <Header />
-      <Breadcrumb />
+      <Breadcrumb title="Blog two column with right sidebar" />
       <div className="bg-gray-200 py-12">
-        <div className="container mx-auto grid grid-cols-3 gap-12">
-          <div className="col-span-2 grid grid-cols-2 gap-12">
+        <div className="container mx-auto px-4 grid lg:grid-cols-3 gap-12 items-start">
+          <div className="col-span-2 md:grid md:grid-cols-2 gap-12">
             {loading && <div>Loading...</div>}
             {error && <div>Upps... An error occured.</div>}
-            {posts
-              .filter(
-                (item) => search.length >= 0 && item.title.includes(search)
-              )
-              .map((post, index) => (
-                <div key={index} className="bg-white shadow">
-                  {photos
-                    .filter((item) => item.id === post.id)
-                    .map((photo) => (
-                      <img
-                        className="object-cover w-full"
-                        style={{ height: "350px" }}
-                        src={photo.url}
-                        alt={photo.title}
-                      />
-                    ))}
+            {currentItems.length === 0 && (
+              <div>
+                <b>"{search}"</b> not found. Either this doesn’t exist yet or
+                it’s spelled differently.
+              </div>
+            )}
+            {currentItems &&
+              currentItems.map((post) => (
+                <div key={post.id} className="bg-white shadow mb-4 md:mb-0">
+                  {photos &&
+                    photos
+                      .filter((item) => item.id === post.id)
+                      .map((photo) => (
+                        <Link key={photo.id} href={"/blog/" + post.id}>
+                          <a>
+                            <img
+                              className="object-cover w-full"
+                              style={{ height: "350px" }}
+                              src={photo.url}
+                              alt={photo.title}
+                            />
+                          </a>
+                        </Link>
+                      ))}
                   <div className="p-4">
-                    <h4 className="text-2xl">{post.title}</h4>
+                    <Link href={"/blog/" + post.id}>
+                      <a>
+                        <h4 className="text-2xl capitalize">{post.title}</h4>
+                      </a>
+                    </Link>
                     <div className="flex mt-2 mb-6">
-                      {users
-                        .filter((item) => item.id === post.userId)
-                        .map((user) => (
-                          <div className="flex items-center">
-                            <User className="text-green-500 mr-2" />
-                            Posted by {user.name}
-                          </div>
-                        ))}
+                      {users &&
+                        users
+                          .filter((item) => item.id === post.userId)
+                          .map((user) => (
+                            <div key={user.id} className="flex items-center">
+                              <User className="text-green-500 mr-2" />
+                              Posted by {user.name}
+                            </div>
+                          ))}
                       <div className="flex items-center ml-12">
                         <Calendar className="text-green-500 mr-2" />
                         {today}
@@ -144,39 +124,23 @@ export default function Home() {
                   </div>
                 </div>
               ))}
-          </div>
-          <div>
-            <div className="bg-white p-4 mb-12">
-              <div className="relative flex items-center bg-gray-200">
-                <input
-                  name={search}
-                  value={search}
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                  }}
-                  type="text"
-                  placeholder="Search for blog"
-                  className="appearance-none w-full bg-transparent px-4 pr-8 py-2 text-black focus:outline-none"
-                />
-                <Search className="absolute right-0 m-2" />
-              </div>
-            </div>
-            <div className="bg-white p-4 mb-12">
-              <p className="text-2xl uppercase">Categories</p>
-              <span className="block my-2 w-16 h-px bg-black"></span>
-              {categories.map((category, index) => (
+            <div className="flex col-span-2">
+              {pages.map((item) => (
                 <div
-                  key={category.id}
-                  className={`flex justify-between border-gray-300 py-2 ${
-                    categories.length === index + 1 ? "" : "border-b"
+                  key={item}
+                  onClick={() => setCurrentPage(item)}
+                  className={`cursor-pointer px-1 mx-1 py-1 ${
+                    item === currentPage
+                      ? "border-b-2 border-black"
+                      : "text-gray-500"
                   }`}
                 >
-                  <p>{category.title}</p>
-                  <span className="text-gray-400">{category.items}</span>
+                  {item}
                 </div>
               ))}
             </div>
           </div>
+          <Sidebar search={search} handleChange={handleChange} />
         </div>
       </div>
       <Footer />

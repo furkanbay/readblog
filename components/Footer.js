@@ -5,11 +5,11 @@ import Twitter from "./SVG/Twitter";
 import Linkedin from "./SVG/Linkedin";
 import Youtube from "./SVG/Youtube";
 
-export default function Footer() {
+export default function Sidebar() {
   return (
     <div className="bg-white p-4">
-      <footer className="container mx-auto flex items-center justify-between">
-        <div>
+      <footer className="container mx-auto flex flex-col md:flex-row items-center justify-between">
+        <div className='mb-6 md:mb-0'>
           Copyright © 2016{" "}
           <Link href="/">
             <a className="rb-link">

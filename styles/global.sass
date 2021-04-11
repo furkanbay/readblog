@@ -2,6 +2,10 @@
 @tailwind components
 @tailwind utilities
 
+input
+    @apply appearance-none w-full
+    &:focus
+        @apply rounded-none outline-none
 .rb-link
     @apply text-green-600
     &:hover
@@ -12,3 +16,7 @@
             @apply visible opacity-100
 .breadcrumb
     background-image: url('/images/breadcrumb-bg.jpg')
+
+.rb-newsletter
+    background-image: url('/images/newsletter-bg.svg')
+    @apply bg-center bg-cover bg-no-repeat
